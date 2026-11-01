@@ -87,9 +87,17 @@ fn rename_path(access: State<'_, access::Access>, root: String, path: String, ne
 }
 
 #[tauri::command]
-fn rename_project(access: State<'_, access::Access>, root: String, new_name: String) -> CmdResult<project::Project> {
-    let to = project::rename_project(&access.project(&root)?, &new_name).map_err(err)?;
+fn rename_project(app: AppHandle, access: State<'_, access::Access>, root: String, new_name: String) -> CmdResult<project::Project> {
+    let from = access.project(&root)?;
+    let to = project::rename_project(&from, &new_name).map_err(err)?;
     let p = project::open(&to).map_err(err)?;
+    // Snapshots are stored by project path; carry them over to the new one.
+    let data = data_root(&app)?;
+    let (old_store, new_store) = (checkpoint::store_dir(&data, Path::new(&root)), checkpoint::store_dir(&data, Path::new(&p.root)));
+    if old_store.is_dir() && !new_store.exists() {
+        let _ = std::fs::rename(old_store, new_store);
+    }
+    access.forget_project(&from);
     access.add_project(Path::new(&p.root));
     Ok(p)
 }
@@ -114,14 +122,19 @@ fn cancel_compile(running: State<'_, Arc<latex::Running>>) {
     running.cancel();
 }
 
-#[tauri::command]
-fn read_pdf(app: AppHandle, path: String) -> CmdResult<tauri::ipc::Response> {
-    let builds = cache_root(&app)?.join("builds");
-    let path = Path::new(&path).canonicalize().map_err(err)?;
-    if !path.starts_with(builds.canonicalize().map_err(err)?) {
+/// A path inside the build cache, which is where compiles write their PDFs.
+fn build_output(app: &AppHandle, path: &str) -> CmdResult<PathBuf> {
+    let builds = cache_root(app)?.join("builds").canonicalize().map_err(err)?;
+    let path = Path::new(path).canonicalize().map_err(err)?;
+    if !path.starts_with(builds) {
         return Err("not a build output".into());
     }
-    Ok(tauri::ipc::Response::new(std::fs::read(path).map_err(err)?))
+    Ok(path)
+}
+
+#[tauri::command]
+fn read_pdf(app: AppHandle, path: String) -> CmdResult<tauri::ipc::Response> {
+    Ok(tauri::ipc::Response::new(std::fs::read(build_output(&app, &path)?).map_err(err)?))
 }
 
 #[tauri::command]
@@ -132,23 +145,18 @@ fn export_zip(access: State<'_, access::Access>, root: String, dest: String) -> 
 /// Copies a compiled PDF out of the build cache to where the user chose.
 #[tauri::command]
 fn save_pdf(app: AppHandle, access: State<'_, access::Access>, pdf: String, dest: String) -> CmdResult<()> {
-    let builds = cache_root(&app)?.join("builds").canonicalize().map_err(err)?;
-    let pdf = Path::new(&pdf).canonicalize().map_err(err)?;
-    if !pdf.starts_with(builds) {
-        return Err("not a build output".into());
-    }
-    std::fs::copy(pdf, access.chosen(&dest)?).map(|_| ()).map_err(err)
+    std::fs::copy(build_output(&app, &pdf)?, access.chosen(&dest)?).map(|_| ()).map_err(err)
 }
 
 #[tauri::command]
-fn synctex_forward(access: State<'_, access::Access>, root: String, pdf: String, file: String, line: u32) -> Vec<synctex::PdfBox> {
-    let (Some(bin), Ok(root)) = (latex::find_tex_bin(), access.project(&root)) else { return vec![] };
-    synctex::forward(&bin, Path::new(&pdf), &root, &file, line)
+fn synctex_forward(app: AppHandle, access: State<'_, access::Access>, root: String, pdf: String, file: String, line: u32) -> Vec<synctex::PdfBox> {
+    let (Some(bin), Ok(root), Ok(pdf)) = (latex::find_tex_bin(), access.project(&root), build_output(&app, &pdf)) else { return vec![] };
+    synctex::forward(&bin, &pdf, &root, &file, line)
 }
 
 #[tauri::command]
-fn synctex_inverse(access: State<'_, access::Access>, root: String, pdf: String, page: u32, x: f64, y: f64) -> Option<synctex::SourceLocation> {
-    synctex::inverse(&latex::find_tex_bin()?, Path::new(&pdf), &access.project(&root).ok()?, page, x, y)
+fn synctex_inverse(app: AppHandle, access: State<'_, access::Access>, root: String, pdf: String, page: u32, x: f64, y: f64) -> Option<synctex::SourceLocation> {
+    synctex::inverse(&latex::find_tex_bin()?, &build_output(&app, &pdf).ok()?, &access.project(&root).ok()?, page, x, y)
 }
 
 /// Project folder passed on the command line (`corollary ~/papers/thesis`).

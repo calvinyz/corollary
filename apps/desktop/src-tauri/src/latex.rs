@@ -181,16 +181,56 @@ impl CompileResult {
 
 #[derive(Default)]
 pub struct Running {
-    pid: Mutex<Option<u32>>,
-    cancelled: Mutex<bool>,
+    state: Mutex<RunState>,
+}
+
+/// `generation` tells a compile whether it is still the current one: a newer compile kills the
+/// older one, and the older one must not clear the newer one's pid on its way out.
+#[derive(Default)]
+struct RunState {
+    generation: u64,
+    pid: Option<u32>,
+    cancelled: bool,
 }
 
 impl Running {
     pub fn cancel(&self) {
-        if let Some(pid) = self.pid.lock().unwrap().take() {
-            *self.cancelled.lock().unwrap() = true;
+        let mut st = self.state.lock().unwrap();
+        if let Some(pid) = st.pid.take() {
+            st.cancelled = true;
             kill_group(pid);
         }
+    }
+
+    /// Stops any running compile and returns the new compile's generation.
+    fn start(&self) -> u64 {
+        let mut st = self.state.lock().unwrap();
+        if let Some(pid) = st.pid.take() {
+            kill_group(pid);
+        }
+        st.generation += 1;
+        st.cancelled = false;
+        st.generation
+    }
+
+    fn set_pid(&self, generation: u64, pid: u32) {
+        let mut st = self.state.lock().unwrap();
+        if st.generation == generation {
+            st.pid = Some(pid);
+        } else {
+            // Superseded while spawning.
+            kill_group(pid);
+        }
+    }
+
+    /// True if this compile was stopped by the user or replaced by a newer one.
+    fn finish(&self, generation: u64) -> bool {
+        let mut st = self.state.lock().unwrap();
+        if st.generation != generation {
+            return true;
+        }
+        st.pid = None;
+        std::mem::take(&mut st.cancelled)
     }
 }
 
@@ -276,14 +316,13 @@ pub fn compile_with(bin: &Path, project_root: &Path, main: &str, out_dir: &Path,
         cmd.process_group(0);
     }
 
-    running.cancel();
-    *running.cancelled.lock().unwrap() = false;
+    let generation = running.start();
     let started = Instant::now();
     let mut child = match cmd.spawn() {
         Ok(c) => c,
         Err(e) => return CompileResult::failure(format!("Couldn't start latexmk: {e}")),
     };
-    *running.pid.lock().unwrap() = Some(child.id());
+    running.set_pid(generation, child.id());
 
     let mut stdout = child.stdout.take().unwrap();
     let mut stderr = child.stderr.take().unwrap();
@@ -313,8 +352,7 @@ pub fn compile_with(bin: &Path, project_root: &Path, main: &str, out_dir: &Path,
         }
     }
     let exit_ok = child.wait().map(|s| s.success()).unwrap_or(false);
-    running.pid.lock().unwrap().take();
-    let cancelled = std::mem::take(&mut *running.cancelled.lock().unwrap());
+    let cancelled = running.finish(generation);
 
     let console = String::from_utf8_lossy(&out_thread.join().unwrap_or_default()).into_owned()
         + &String::from_utf8_lossy(&err_thread.join().unwrap_or_default());
@@ -659,6 +697,15 @@ mod tests {
         let biber = "[101] Utils.pm:410> WARN - Duplicate entry key 'x' in file 'ref.bib'\n[102] Biber.pm:1> ERROR - BibTeX subsystem: syntax error\n";
         let e = parse_blg(biber);
         assert_eq!((e[0].level, e[1].level), (Level::Warning, Level::Error));
+    }
+
+    #[test]
+    fn newer_compile_supersedes_older() {
+        let r = Running::default();
+        let a = r.start();
+        let b = r.start();
+        assert!(r.finish(a), "the older compile reports itself cancelled");
+        assert!(!r.finish(b), "and doesn't disturb the newer one");
     }
 
     #[test]

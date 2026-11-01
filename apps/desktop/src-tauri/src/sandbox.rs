@@ -69,6 +69,11 @@ fn profile(bin: &Path, project_root: &Path, out_dir: &Path, path_env: &OsStr) ->
     let tex = tex_dirs(bin, path_env);
     let mut writable: Vec<PathBuf> = vec![real(project_root), real(out_dir), PathBuf::from("/private/tmp"), PathBuf::from("/private/var/folders")];
     for d in &tex.writable {
+        // Made now, outside the sandbox: on MacTeX they sit two levels down
+        // (~/Library/texlive/2025/texmf-var) and TeX inside the sandbox couldn't create them.
+        if d.starts_with(&home) {
+            let _ = std::fs::create_dir_all(d);
+        }
         let d = real(d);
         // TeX creates e.g. `~/.texlive2026/texmf-var` on first use, so its parent must be writable.
         if let Some(parent) = d.parent().filter(|p| *p != home && p.starts_with(&home)) {

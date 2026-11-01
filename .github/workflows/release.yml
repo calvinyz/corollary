@@ -66,7 +66,8 @@ jobs:
         run: |
           codesign --verify --deep --strict --verbose=2 macos/Corollary.app
           # Library validation kills the helper if signing and the hardened runtime disagree.
-          out=$(macos/Corollary.app/Contents/MacOS/corollary-fm --port 0 < /dev/null | head -1)
+          # --exit-with-stdin: stdin is /dev/null, so the helper quits once it has printed its port.
+          out=$(macos/Corollary.app/Contents/MacOS/corollary-fm --port 0 --exit-with-stdin < /dev/null | head -1)
           echo "$out" | grep -q '"port"' || { echo "corollary-fm didn't start: $out"; exit 1; }
 
       - name: Draft release
@@ -81,5 +82,8 @@ jobs:
             --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             '{version: $v, pub_date: $date, platforms: {"darwin-aarch64": {signature: $sig, url: $url}}}' > latest.json
           shasum -a 256 "$dmg"
-          gh release create "$GITHUB_REF_NAME" "$dmg" macos/Corollary.app.tar.gz macos/Corollary.app.tar.gz.sig latest.json \
+          # A fixed name lets the website link straight to releases/latest/download/Corollary.dmg;
+          # the cask keeps using the versioned file.
+          cp "$dmg" Corollary.dmg
+          gh release create "$GITHUB_REF_NAME" "$dmg" Corollary.dmg macos/Corollary.app.tar.gz macos/Corollary.app.tar.gz.sig latest.json \
             -R "$GITHUB_REPOSITORY" --draft --title "Corollary $v" --generate-notes

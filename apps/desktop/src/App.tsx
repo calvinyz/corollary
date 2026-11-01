@@ -83,6 +83,7 @@ export default function App() {
   const [autoCompile, setAutoCompile] = useState(() => localStorage.getItem(AUTO_COMPILE) !== "0");
   const autoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const compilingRef = useRef(false);
+  const compileAgain = useRef(false);
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
   const [highlight, setHighlight] = useState<PdfBox[]>([]);
   const [logOpen, setLogOpen] = useState(false);
@@ -190,6 +191,11 @@ export default function App() {
 
   const compile = async (p = project, m = main) => {
     if (!p || !m) return;
+    // One compile at a time; a request made meanwhile runs when this one ends.
+    if (compilingRef.current) {
+      compileAgain.current = true;
+      return;
+    }
     setError(null);
     try {
       await saveAll(p);
@@ -224,6 +230,10 @@ export default function App() {
     } finally {
       setCompiling(false);
       compilingRef.current = false;
+      if (compileAgain.current) {
+        compileAgain.current = false;
+        compileRef.current();
+      }
     }
   };
 

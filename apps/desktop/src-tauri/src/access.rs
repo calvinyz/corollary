@@ -45,16 +45,28 @@ impl Access {
         self.project(path).or_else(|_| self.chosen(path))
     }
 
+    /// After a project moves, its old path is no longer trusted.
+    pub fn forget_project(&self, root: &Path) {
+        let root = real(root);
+        let mut projects = self.projects.lock().unwrap();
+        projects.retain(|p| *p != root);
+        self.save(&projects);
+    }
+
     pub fn add_project(&self, root: &Path) {
         let root = real(root);
         let mut projects = self.projects.lock().unwrap();
         projects.retain(|p| *p != root);
         projects.insert(0, root);
         projects.truncate(MAX_PROJECTS);
+        self.save(&projects);
+    }
+
+    fn save(&self, projects: &[PathBuf]) {
         if let Some(dir) = self.store.parent() {
             let _ = std::fs::create_dir_all(dir);
         }
-        let _ = std::fs::write(&self.store, serde_json::to_vec_pretty(&*projects).unwrap_or_default());
+        let _ = std::fs::write(&self.store, serde_json::to_vec_pretty(projects).unwrap_or_default());
     }
 }
 
