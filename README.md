@@ -27,6 +27,7 @@ Or run `xattr -dr com.apple.quarantine /Applications/Corollary.app` in Terminal 
 ## What it does
 
 - **Opens Overleaf and Prism projects.** Drop in a zip or a folder. The main file is found for you.
+  Or start a new project from a template, and add files of any type as you go.
 - **Compiles like Overleaf.** TeX Live with latexmk, pdfLaTeX by default, XeLaTeX or LuaLaTeX when
   the project needs them, BibTeX and Biber. No TeX on your Mac? Corollary installs a private copy
   and fetches missing packages as projects need them.
@@ -35,6 +36,8 @@ Or run `xattr -dr com.apple.quarantine /Applications/Corollary.app` in Terminal 
 - **Two-way sync** between source and PDF: ⌘-click the PDF, or ⌘⌥→ from the editor.
 - **⌘K on a selection:** tighten, rewrite, fix grammar, formalize, or describe your own edit. Every
   edit shows up as a diff you accept or reject, hunk by hunk.
+- **⌘K with nothing selected:** describe what you need (a table, an equation, a figure, a paragraph)
+  and it's drafted at the cursor for you to review. Results it can't know come back as `[TODO]`.
 - **Paste or drop an image of an equation** and get LaTeX, from a model running on your Mac.
 - **Snapshots before every AI edit**, kept outside your project folder.
 - **Your choice of model:** Apple's on-device model (default), Ollama on your Mac or on a GPU box
@@ -46,7 +49,8 @@ Or run `xattr -dr com.apple.quarantine /Applications/Corollary.app` in Terminal 
 - **AI with no setup.** Apple's on-device model is already on your Mac, so ⌘K works the first time
   you open the app, offline and free.
 - **Edits checked against your LaTeX.** If an AI edit would drop a `\cite`, `\ref` or `\label`,
-  change a formula or unbalance braces, it's blocked before you see it.
+  change a formula or unbalance braces, it's blocked before you see it. Drafts are held back if they
+  cite something that isn't in your .bib, use a package you don't load, or invent numbers.
 - **Full TeX Live, set up for you.** Projects from Overleaf and Prism compile the way they did there,
   and missing packages install as needed.
 - **Equations from images, on your Mac.**

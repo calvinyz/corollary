@@ -16,7 +16,7 @@
       <a class="button light" href="download">Download</a>
     </header>
     <main class="doc">
-      <p class="kicker">October 30, 2026</p>
+      <p class="kicker">October 30, 2026 · updated November 1 with writing from scratch</p>
       <h1>How good is Apple’s on-device model at LaTeX?</h1>
       <p class="lede-doc">Macs with Apple Intelligence come with a small language model that runs on the computer itself. Before building Corollary around it, we wanted to know whether it could edit a paper without breaking the LaTeX.</p>
 
@@ -43,8 +43,25 @@
         <li><b>Explaining errors is harder.</b> On 6 test errors it found the right line 5 times but proposed a working fix only twice, so Corollary shows its fix for you to review rather than applying it.</li>
       </ul>
 
+      <h2>Update: writing from scratch</h2>
+      <p>Corollary 0.1.1 adds Write: with nothing selected, ⌘K drafts LaTeX at the cursor. Editing has an original to compare against; writing doesn’t, so we tested it separately. We asked for eight kinds of insertion in a short robotics paper: a related-work paragraph, a comparison table, a list of contributions, a figure, a numbered equation, a sentence pointing to the results, a conclusion and a hyperparameter table. We ran each twice, for 16 drafts, then compiled every draft inside the paper.</p>
+      <dl class="figures">
+        <div><dt>15 of 16</dt><dd>drafts passed Corollary’s checks</dd></div>
+        <div><dt>15 of 15</dt><dd>of those compiled inside the paper</dd></div>
+        <div><dt>3–10 s</dt><dd>per draft, on an M1 Max</dd></div>
+      </dl>
+      <p>The one draft held back wrote <code>O(n^2)</code> outside math mode, which doesn’t compile. Corollary named the problem instead of inserting it.</p>
+      <p>Our first prompt did much worse. The model filled a comparison table with made-up results (0.85 success, 120&nbsp;ms), used <code>\multirow</code> without its package, reused a <code>\label</code> the paper already had, and answered most requests with lists of placeholders. Two changes fixed most of that. Corollary now tells the model which packages, citation keys and labels the paper has, and gives it two short examples. New checks catch the rest:</p>
+      <ul>
+        <li>citations that aren’t in your .bib;</li>
+        <li>references to labels that don’t exist, and reused labels;</li>
+        <li>commands from packages the paper doesn’t load;</li>
+        <li>numbers that don’t appear anywhere in your paper.</li>
+      </ul>
+      <p>In practice it’s good at structure: tables, lists, equations, figure environments and cross-references. Its prose is plausible but generic, so treat a drafted paragraph as a starting point. It never fills in results; those come back as <code>[TODO]</code> for you.</p>
+
       <h2>Caveats</h2>
-      <p>This is one machine, one run, and paragraphs we wrote, not ones taken from real papers. Apple updates the model with macOS, so we’ll rerun the test with each release. The test code is <a href="https://github.com/calvinyz/corollary/tree/main/evals/probe-fm">on GitHub</a> if you want to run it yourself.</p>
+      <p>This is one machine, a handful of runs, and text we wrote, not text taken from real papers. Apple updates the model with macOS, so we’ll rerun the test with each release. The test code is <a href="https://github.com/calvinyz/corollary/tree/main/evals/probe-fm">on GitHub</a> if you want to run it yourself.</p>
     </main>
     <footer>
       <a class="logo" href="./"><img src="assets/mark-dark.svg" alt="" width="18" height="18" />Corollary</a>
