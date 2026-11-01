@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Corollary: a free LaTeX editor for Mac, with AI that runs on your Mac</title>
+    <meta
+      name="description"
+      content="A free, open-source LaTeX editor for Mac that works like Overleaf. The AI runs on your Mac, so there’s no account, it works offline, and your paper stays with you."
+    />
+    <meta name="theme-color" content="#0b0b0a" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="fonts/latinmodern-math.otf" as="font" type="font/otf" crossorigin />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <svg class="grain" aria-hidden="true"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#grain)" /></svg>
+
+    <header class="nav">
+      <a class="logo" href="#top"><img src="assets/mark-dark.svg" alt="" width="22" height="22" />Corollary</a>
+      <span class="spacer"></span>
+      <a class="star" href="https://github.com/calvinyz/corollary" aria-label="Star Corollary on GitHub">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M8 .25a.75.75 0 0 1 .67.42l1.88 3.8 4.2.61a.75.75 0 0 1 .41 1.28l-3.04 2.96.72 4.18a.75.75 0 0 1-1.09.79L8 12.33l-3.75 1.96a.75.75 0 0 1-1.09-.79l.72-4.18L.84 6.36a.75.75 0 0 1 .41-1.28l4.2-.61L7.33.67A.75.75 0 0 1 8 .25Z" /></svg>
+        Star<span class="stars" hidden></span>
+      </a>
+      <a class="button light" href="download.html">Download</a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <canvas class="field" aria-hidden="true"></canvas>
+        <div class="hero-inner">
+          <h1 class="compile-title" aria-label="Write your paper. Keep it on your Mac.">
+            <span class="src" aria-hidden="true">\title{Write your paper.}<br />\emph{Keep it on your Mac.}</span>
+            <span class="out" aria-hidden="true"
+              ><span>Write</span> <span>your</span> <span>paper.</span><br /><span>Keep</span> <span>it</span>
+              <em><span>on</span> <span>your</span> <span>Mac.</span></em></span
+            >
+          </h1>
+          <p class="lede reveal">
+            A free LaTeX editor for Mac that works like Overleaf, with AI that runs on your Mac. No account, and it works offline.
+          </p>
+          <div class="hero-actions reveal">
+            <a class="button light" href="download.html">Download for Mac</a>
+            <a class="button" href="https://github.com/calvinyz/corollary">
+              <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M8 .25a.75.75 0 0 1 .67.42l1.88 3.8 4.2.61a.75.75 0 0 1 .41 1.28l-3.04 2.96.72 4.18a.75.75 0 0 1-1.09.79L8 12.33l-3.75 1.96a.75.75 0 0 1-1.09-.79l.72-4.18L.84 6.36a.75.75 0 0 1 .41-1.28l4.2-.61L7.33.67A.75.75 0 0 1 8 .25Z" /></svg>
+              Star on GitHub
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <a class="scroll-cue" href="#different" aria-label="Scroll down"><span>Scroll</span><i></i></a>
+
+      <section class="stage">
+        <div class="tilt">
+          <img
+            src="assets/workspace-review-dark.jpg"
+            alt="Corollary with a paper open: files on the left, the LaTeX source in the middle with an AI edit shown as a diff to accept or reject, and the compiled PDF on the right."
+          />
+        </div>
+        <p class="requirements">Free and open source · Apple silicon Macs</p>
+      </section>
+
+      <section class="different" id="different">
+        <div class="pin">
+        <h2>What makes it different.</h2>
+        <div class="story">
+          <ul class="claims">
+            <li data-i="0"><i class="tick"></i>
+              <h3>The AI is already on your Mac</h3>
+              <p>It uses the model built into macOS. You don’t need an account or an API key, and it’s free.</p>
+            </li>
+            <li data-i="1"><i class="tick"></i>
+              <h3>It works offline</h3>
+              <p>Write, compile and use the AI on a plane.</p>
+            </li>
+            <li data-i="2"><i class="tick"></i>
+              <h3>AI edits don’t break your LaTeX</h3>
+              <p>If a suggestion deletes a citation or changes an equation, Corollary blocks it.</p>
+            </li>
+            <li data-i="3"><i class="tick"></i>
+              <h3>TeX sets itself up</h3>
+              <p>No TeX installed? Corollary installs it, plus any package your paper needs.</p>
+            </li>
+            <li data-i="4"><i class="tick"></i>
+              <h3>Equations from a photo</h3>
+              <p>Paste a screenshot or a photo of a whiteboard and get the LaTeX.</p>
+            </li>
+          </ul>
+          <div class="panel" aria-hidden="true">
+            <div class="scene s0">
+              <div class="chip-row"><span class="dot ok"></span>Apple on-device model</div>
+              <div class="bubble">Tighten this paragraph</div>
+              <div class="reply" data-text="Language-model assistants are now common in research, but they send unpublished text off the author’s machine."></div>
+              <div class="meter"><span>Account</span><b>none</b><span>API key</span><b>none</b><span>Cost</span><b>$0</b></div>
+            </div>
+            <div class="scene s1">
+              <div class="menubar"><span>Corollary</span><span class="spacer"></span><span class="wifi-off" title="Wi-Fi off"><svg viewBox="0 0 24 18"><path d="M2 6.5a14 14 0 0 1 20 0M5.5 10a9 9 0 0 1 13 0M9 13.5a4 4 0 0 1 6 0" /><circle cx="12" cy="16" r="1.4" /><line x1="3" y1="17" x2="21" y2="1" class="slash" /></svg>Wi-Fi off</span><span>10:42</span></div>
+              <ul class="log">
+                <li><span>Compile main.tex</span><b>1.8 s</b></li>
+                <li><span>Tighten paragraph</span><b>Apple on-device</b></li>
+                <li><span>Equation from photo</span><b>0.3 s</b></li>
+              </ul>
+            </div>
+            <div class="scene s2">
+              <p class="edit-line">… in research~<span class="cite">\citep{smith2024}</span>.</p>
+              <p class="edit-line out">… in research.</p>
+              <p class="verdict">Blocked: this edit deleted a citation</p>
+            </div>
+            <div class="scene s3">
+              <p class="install-label">Installing TeX Live</p>
+              <div class="bar"><i></i></div>
+              <ul class="pkgs"><li>latexmk</li><li>amsmath</li><li>natbib</li><li>hyperref</li><li>booktabs</li><li>tikz</li><li>biblatex</li><li>siunitx</li></ul>
+              <p class="install-done">Ready to compile</p>
+            </div>
+            <div class="scene s4">
+              <div class="ink-eq">lim<sub>x→−1</sub> <span class="frac"><span>x³ + 1</span><span>x + 1</span></span></div>
+              <pre class="tex"><span class="cmd">\lim</span>_{x <span class="cmd">\rightarrow</span> -1} <span class="cmd">\frac</span>{x^{3}+1}{x+1}</pre>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <section class="editing" id="editing">
+        <div class="editing-pin">
+          <div class="editing-copy">
+            <h2>Select text. Press <span class="keys"><kbd class="key">⌘</kbd><kbd class="key">K</kbd></span></h2>
+            <p>Tighten it, fix the grammar, make it more formal, or ask for anything else. You see the change and keep what you like.</p>
+          </div>
+          <div class="demo" aria-label="Interactive example of an AI edit">
+            <div class="demo-bar">
+              <span class="try">Try it</span>
+              <span class="file">main.tex</span>
+              <span class="demo-model"><i></i>Apple on-device</span>
+            </div>
+            <p class="demo-text"></p>
+            <p class="demo-status"></p>
+            <div class="demo-review" hidden>
+              <button data-choice="reject">Reject</button>
+              <button class="light" data-choice="accept">Accept</button>
+            </div>
+            <div class="demo-actions">
+              <button data-run="tighten">Tighten</button>
+              <button data-run="formalize">Formalize</button>
+              <button class="quiet" data-reset>Reset</button>
+            </div>
+          </div>
+          <ol class="demo-steps">
+            <li>Select</li>
+            <li>Tighten</li>
+            <li>Accept</li>
+            <li>Blocked</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="familiar" id="switch">
+        <div class="reveal">
+          <h2>Coming from Overleaf or Prism?</h2>
+          <p>Download your project as a zip and drop it in. It opens and compiles the same way.</p>
+          <p class="deadline">Prism shuts down on <b>January 1, 2027</b>.</p>
+          <ul class="same reveal">
+            <li><b>Same layout.</b> Files, source and PDF side by side, with a Recompile button.</li>
+            <li><b>Same compiler.</b> TeX Live, like Overleaf.</li>
+            <li><b>⌘-click</b> the PDF to jump to the line.</li>
+            <li><b>Click an error</b> to go to it, or ask the AI to explain it.</li>
+          </ul>
+        </div>
+        <div class="drop">
+          <div class="window">
+            <div class="win-bar"><span>Corollary</span></div>
+            <div class="win-body">
+              <div class="target">Drop a zip</div>
+              <ul class="tree"><li>figures/</li><li>sections/</li><li class="main">main.tex</li><li>refs.bib</li><li>neurips_2026.sty</li></ul>
+              <div class="win-pdf"><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+          </div>
+          <div class="zip"><svg viewBox="0 0 24 30"><path d="M3 1h12l6 6v22H3z" /><path d="M15 1v6h6" /><path d="M10 4h2M10 8h2M10 12h2M10 16h2" /></svg><span>paper.zip</span><svg class="cursor" viewBox="0 0 16 22"><path d="M1 1v17l4.5-4.2 3 6.7 2.6-1.2-3-6.6H14z" /></svg></div>
+          <button class="replay" type="button">Replay</button>
+        </div>
+      </section>
+
+      <section class="soon" id="soon">
+        <h2 class="reveal">What’s next.</h2>
+        <ol class="timeline">
+          <li class="reveal"><span class="when">Next</span><p>Download open models like Qwen and Gemma inside the app, for bigger jobs like reviewing a whole paper.</p></li>
+          <li class="reveal"><span class="when">Then</span><p>Check that every reference in your .bib is real.</p></li>
+          <li class="reveal"><span class="when">Then</span><p>A version for Windows and Linux.</p></li>
+          <li class="reveal"><span class="when">Later</span><p>Share a project and edit it with co-authors.</p></li>
+        </ol>
+        <p class="note reveal">
+          Want something sooner? <a href="https://github.com/calvinyz/corollary">Star the repo</a> or open an issue.
+        </p>
+      </section>
+
+      <section class="why" id="why">
+        <h2 class="reveal">Why we made this.</h2>
+        <div class="letter reveal">
+          <p>
+            When OpenAI said Prism would shut down, a lot of people needed a new home for their papers. Most of the options were other websites, so your unpublished work would sit on someone else’s server, and you couldn’t write offline.
+          </p>
+          <p>
+            At the same time, Macs with Apple Intelligence started shipping with a small language model that runs on the computer itself. It’s good at small jobs, like tightening a paragraph or explaining a compile error, and it’s free and private.
+          </p>
+          <p>
+            So we built the editor we wanted. It looks like Overleaf, sets up TeX for you, and keeps that model one shortcut away. It’s
+            open source, so you can check that it does what we say.
+          </p>
+        </div>
+      </section>
+
+      <section class="questions">
+        <h2 class="reveal">Questions.</h2>
+        <details class="reveal">
+          <summary>Does it cost anything?</summary>
+          <p>No. It’s free and open source.</p>
+        </details>
+        <details class="reveal">
+          <summary>Which Macs get the on-device AI?</summary>
+          <p>Apple silicon Macs with Apple Intelligence on macOS 26 or later. On older Macs, ⌘K can use Ollama instead.</p>
+        </details>
+        <details class="reveal">
+          <summary>Does anything I write leave my Mac?</summary>
+          <p>
+            No, unless you choose to connect an outside AI model. Corollary only goes online to download TeX packages.
+            <a href="privacy.html">Privacy details</a>.
+          </p>
+        </details>
+        <details class="reveal">
+          <summary>How good is Apple’s model at LaTeX?</summary>
+          <p>
+            Good at paragraph-sized edits, not whole papers.
+            <a href="testing.html">How we tested it</a>.
+          </p>
+        </details>        <details class="reveal">
+          <summary>Can I share a project or write with co-authors?</summary>
+          <p>Not in the app yet. Projects are ordinary folders, so Git, Dropbox or iCloud work.</p>
+        </details>
+      </section>
+
+      <section class="end">
+        <canvas class="field end-field" aria-hidden="true"></canvas>
+        <h2 class="reveal"><span class="therefore">∴</span> Write it here.</h2>
+        <div class="end-actions reveal">
+          <a class="button light" href="download.html">Download for Mac</a>
+          <a class="button" href="https://github.com/calvinyz/corollary">Star on GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="logo" href="#top"><img src="assets/mark-dark.svg" alt="" width="18" height="18" />Corollary</a>
+      <span>Apache-2.0</span>
+      <a href="https://github.com/calvinyz/corollary">GitHub</a>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
