@@ -60,6 +60,25 @@ async fn pick_save(app: AppHandle, title: String, file_name: String, filter: Str
     .await
 }
 
+/// A save dialog without a file type, for naming a new project folder.
+#[tauri::command]
+async fn pick_new_folder(app: AppHandle, title: String, name: String) -> CmdResult<Option<String>> {
+    pick(app, move |d| d.set_title(title).set_file_name(name).blocking_save_file()).await
+}
+
+#[tauri::command]
+fn new_project(access: State<'_, access::Access>, path: String) -> CmdResult<project::Project> {
+    let dir = project::new_project(&access.chosen(&path)?).map_err(err)?;
+    let p = project::open(&dir).map_err(err)?;
+    access.add_project(Path::new(&p.root));
+    Ok(p)
+}
+
+#[tauri::command]
+fn create_file(access: State<'_, access::Access>, root: String, path: String) -> CmdResult<String> {
+    project::create(&access.project(&root)?, &path).map_err(err)
+}
+
 #[tauri::command]
 fn open_project(access: State<'_, access::Access>, path: String) -> CmdResult<project::Project> {
     let p = project::open(&access.openable(&path)?).map_err(err)?;
@@ -366,6 +385,9 @@ pub fn run() {
             pick_folder,
             pick_file,
             pick_save,
+            pick_new_folder,
+            new_project,
+            create_file,
             open_project,
             import_zip,
             read_text,

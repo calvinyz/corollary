@@ -11,7 +11,7 @@ choose a model that runs somewhere else.
 | You install TeX Live from Setup | The TeX Live 2025 archive at ftp.math.utah.edu (or ftp.tu-chemnitz.de if that's down) | Requests for the installer and package archives |
 | A project needs a LaTeX package you don't have | The same server | Requests for the package index and the package archives to install. Finding which package has a missing file happens on your Mac. Never your document. |
 | You download the image-to-LaTeX model | huggingface.co | A request for the model files (1.2 GB, once) |
-| You pick a remote model (a server on your network, or a cloud API with your key) | That server | The text you selected for ⌘K, or the compile error with the 80 surrounding source lines. The status bar says "leaves this Mac" while a remote model is selected. |
+| You pick a remote model (a server on your network, or a cloud API with your key) | That server | The text you selected for ⌘K; for Write, the text around the cursor and your citation keys, labels and package names; or the compile error with the 80 surrounding source lines. The status bar says "leaves this Mac" while a remote model is selected. |
 
 Nothing else makes a network request. With Apple's on-device model or Ollama on your Mac, AI edits
 work with Wi-Fi off.

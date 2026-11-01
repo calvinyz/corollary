@@ -28,8 +28,9 @@ export function disclosure(root: string): string {
   const byModel = new Map<string, number>();
   for (const r of accepted) byModel.set(r.model, (byModel.get(r.model) ?? 0) + 1);
   const models = [...byModel].map(([m, n]) => `${m} (${n} edit${n === 1 ? "" : "s"})`).join(", ");
+  const drafted = accepted.some((r) => r.action === "write");
   return (
-    `The authors used AI tools to edit the language of parts of this manuscript: ${models}, through the Corollary editor. ` +
-    "Every suggested edit was reviewed, and the authors take full responsibility for the content."
+    `The authors used AI tools to ${drafted ? "draft and edit" : "edit the language of"} parts of this manuscript: ${models}, through the Corollary editor. ` +
+    `Every suggested ${drafted ? "draft and " : ""}edit was reviewed, and the authors take full responsibility for the content.`
   );
 }

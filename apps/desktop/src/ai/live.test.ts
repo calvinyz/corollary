@@ -2,8 +2,8 @@
 //   COROLLARY_LIVE_URL=http://127.0.0.1:8765/v1 COROLLARY_LIVE_KEY=… pnpm test live
 import { describe, expect, it } from "vitest";
 import type { ChatMessage } from "../api";
-import { ACTIONS, diagnoseMessages, editMessages, numbered, parseDiagnosis } from "./prompts";
-import { check, clean } from "./validate";
+import { ACTIONS, diagnoseMessages, editMessages, numbered, parseDiagnosis, writeMessages, writeRetryMessages, type WriteContext } from "./prompts";
+import { check, checkWrite, clean } from "./validate";
 
 const URL = process.env.COROLLARY_LIVE_URL;
 const KEY = process.env.COROLLARY_LIVE_KEY ?? "";
@@ -35,6 +35,50 @@ describe.skipIf(!URL)("live model", () => {
         expect(r.problems, out).toEqual([]);
       });
     }
+  }
+
+  // Write at cursor: each draft has to pass the validator, after at most one retry like the app.
+  // COROLLARY_LIVE_OUT=<dir> also saves the drafts, to compile them.
+  const ctx: WriteContext = {
+    before: String.raw`\section{Introduction}
+\label{sec:intro}
+Robot manipulation policies must handle multimodal demonstrations.
+`,
+    after: String.raw`
+\section{Results}
+\label{sec:results}
+`,
+    cites: ["chi2023diffusion", "ren2024dppo", "kingma2015adam", "ho2020ddpm"],
+    labels: ["sec:intro", "sec:results", "fig:steps"],
+    packages: ["amsmath", "amssymb", "graphicx", "booktabs", "natbib", "hyperref"],
+  };
+  const WRITES = [
+    "a paragraph on related work about diffusion policies",
+    "a table comparing three methods on success rate and inference time",
+    "an itemized list of our three contributions",
+    "a figure environment for figures/results.pdf with a caption and a label",
+    "the equation for mean squared error, numbered, with a label",
+    "a sentence pointing the reader to the results section",
+    "a short conclusion paragraph",
+    "a two-column table of hyperparameters with learning rate, batch size and epochs",
+  ];
+  for (const [i, w] of WRITES.entries()) {
+    it(`writes: ${w}`, { timeout: 180_000 }, async () => {
+      const first = writeMessages(w, ctx);
+      let out = clean(await chat(first));
+      const verify = (o: string) => checkWrite(o, new Set(ctx.cites), new Set(ctx.labels), new Set(ctx.packages), `${w}\n${ctx.before}\n${ctx.after}`);
+      let r = verify(out);
+      if (!r.ok) {
+        out = clean(await chat(writeRetryMessages(first, out, r.problems)));
+        r = verify(out);
+      }
+      const dir = process.env.COROLLARY_LIVE_OUT;
+      if (dir) {
+        const fs = await import("node:fs");
+        fs.writeFileSync(`${dir}/write-${i}.tex`, out);
+      }
+      expect(r.problems, out).toEqual([]);
+    });
   }
 
   it("explains a compile error", { timeout: 120_000 }, async () => {

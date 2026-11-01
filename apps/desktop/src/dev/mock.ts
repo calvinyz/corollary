@@ -52,6 +52,21 @@ const handlers: Record<string, (a: Args) => unknown> = {
   pick_folder: () => null,
   pick_file: () => null,
   pick_save: () => null,
+  pick_new_folder: () => null,
+  new_project: () => project,
+  create_file: (a) => {
+    const path = String(a.path).trim().replace(/\/+$/, "");
+    const parts = path.split("/");
+    let nodes = project.tree;
+    parts.forEach((name, i) => {
+      const isDir = i < parts.length - 1 || String(a.path).trim().endsWith("/");
+      let n = nodes.find((x) => x.name === name);
+      if (!n) nodes.push((n = { name, path: parts.slice(0, i + 1).join("/"), isDir, children: [] }));
+      nodes = n.children;
+    });
+    files[path] = "";
+    return path;
+  },
   read_text: (a) => files[String(a.path)] ?? "",
   write_text: () => null,
   rename_path: (a) => {

@@ -5,6 +5,7 @@ import {
   api,
   type AiStatus,
   type CompileResult,
+  type FileNode,
   type LogEntry,
   type PdfBox,
   type Project,
@@ -18,17 +19,22 @@ import { Dropdown, MenuItem } from "./workspace/Dropdown";
 import { FileTree } from "./workspace/FileTree";
 import { LogPanel, type Explanation } from "./workspace/LogPanel";
 import { Setup } from "./workspace/Setup";
+import { Help } from "./workspace/Help";
 import { Snapshots } from "./workspace/Snapshots";
 import { Start } from "./workspace/Start";
 import { InlineName } from "./workspace/InlineName";
 import { outline, wordCount } from "./workspace/texinfo";
 import { AiBar } from "./ai/AiBar";
 import { ModelPicker, providerLabel, remoteNote } from "./ai/ModelPicker";
-import { diagnoseMessages, numbered, parseDiagnosis, type EditAction } from "./ai/prompts";
+import { diagnoseMessages, numbered, parseDiagnosis, type EditAction, type WriteContext } from "./ai/prompts";
+import { bibKeys, labelKeys, packageNames } from "./ai/validate";
 import { disclosure, record } from "./ai/provenance";
 import "./App.css";
 
-const TEXT_EXTS = [".tex", ".bib", ".sty", ".cls", ".bst", ".bbx", ".cbx", ".txt", ".md", ".cfg", ".def", ".tikz", ".latexmkrc"];
+const TEXT_EXTS = [
+  ...[".tex", ".bib", ".sty", ".cls", ".bst", ".bbx", ".cbx", ".clo", ".dtx", ".ins", ".ltx", ".cfg", ".def", ".tikz", ".latexmkrc"],
+  ...[".txt", ".md", ".csv", ".tsv", ".dat", ".json", ".yaml", ".yml", ".py", ".r", ".lua", ".gp"],
+];
 const isText = (path: string) => TEXT_EXTS.some((e) => path.toLowerCase().endsWith(e)) || !path.includes(".");
 const IMAGE_EXTS = /\.(png|jpe?g|gif|webp|heic|tiff?|bmp)$/i;
 const LAST_PROJECT = "corollary.lastProject";
@@ -74,6 +80,7 @@ export default function App() {
   const [zoom, setZoom] = useState<Zoom>("fit");
   const [stale, setStale] = useState(false);
   const [renamingProject, setRenamingProject] = useState(false);
+  const [creatingFile, setCreatingFile] = useState(false);
   const [outlineOpen, setOutlineOpen] = useState(() => localStorage.getItem(OUTLINE) !== "0");
   const toggleOutline = () => {
     localStorage.setItem(OUTLINE, outlineOpen ? "0" : "1");
@@ -92,6 +99,7 @@ export default function App() {
   const [notice, setNotice] = useState<string | null>(null);
   const [setupOpen, setSetupOpen] = useState(false);
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [aiStatus, setAiStatus] = useState<AiStatus | null>(null);
   const [provider, setProvider] = useState<Provider | null>(null);
   const [aiSel, setAiSel] = useState<Selection | null>(null);
@@ -277,6 +285,24 @@ export default function App() {
     if (typeof zip === "string") await importZipAt(zip);
   };
 
+  const newProject = async () => {
+    const dir = await api.pickNewFolder("Create a new project", "Untitled Paper");
+    if (typeof dir === "string") await api.newProject(dir).then(openAndCompile).catch((e) => setError(String(e)));
+  };
+
+  /** Creates a file (or a folder, for a name ending in /) and opens it. */
+  const createFile = async (path: string) => {
+    setCreatingFile(false);
+    if (!project) return;
+    try {
+      const created = await api.createFile(project.root, path);
+      setProject(await api.openProject(project.root));
+      if (!path.trim().endsWith("/")) await openFile(project, created);
+    } catch (e) {
+      setError(String(e));
+    }
+  };
+
   // AI edits ---------------------------------------------------------------
 
   const beforeAiEdit = async (label: string) => {
@@ -300,6 +326,27 @@ export default function App() {
     } catch (e) {
       setError(String(e));
     }
+  };
+
+  /** What Write at cursor shows the model: the surrounding text, and the keys it may cite or reference. */
+  const writeContext = async (): Promise<WriteContext> => {
+    const files: string[] = [];
+    const walk = (nodes: FileNode[]) => nodes.forEach((n) => (n.isDir ? walk(n.children) : files.push(n.path)));
+    walk(project?.tree ?? []);
+    const read = (path: string) => buffers.current.get(path)?.text ?? api.readText(project!.root, path).catch(() => "");
+    const [bibs, texs] = await Promise.all([
+      Promise.all(files.filter((f) => f.endsWith(".bib")).map(read)),
+      Promise.all(files.filter((f) => f.endsWith(".tex")).map(read)),
+    ]);
+    const doc = (openPath && buffers.current.get(openPath)?.text) || "";
+    const at = aiSel?.from ?? 0;
+    return {
+      before: doc.slice(0, at),
+      after: doc.slice(at),
+      cites: bibs.flatMap(bibKeys),
+      labels: texs.flatMap(labelKeys),
+      packages: [...new Set([...texs, ...(await Promise.all(files.filter((f) => /\.(sty|cls)$/.test(f)).map(read)))].flatMap(packageNames))],
+    };
   };
 
   const proposeEdit = (sel: Selection, text: string, action: EditAction) => {
@@ -492,14 +539,19 @@ export default function App() {
     setPdfData(null);
   };
 
-  const shortcuts = useRef({ chooseFolder, importZip });
-  shortcuts.current = { chooseFolder, importZip };
+  // ⌘N: a new file inside a project, a new project from the start window.
+  const newItem = () => (project ? setCreatingFile(true) : newProject());
+  const shortcuts = useRef({ chooseFolder, importZip, newItem });
+  shortcuts.current = { chooseFolder, importZip, newItem };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // ⌘? is the Mac help shortcut (⌘/ toggles a comment in the editor).
+      if (e.metaKey && e.key === "?") return (e.preventDefault(), setHelpOpen((o) => !o));
       if (!e.metaKey || e.shiftKey || e.altKey) return;
       const k = e.key.toLowerCase();
       if (k === "o") shortcuts.current.chooseFolder();
       else if (k === "i") shortcuts.current.importZip();
+      else if (k === "n") shortcuts.current.newItem();
       else if (k === "0") setZoom("fit");
       else if (k === "=" || k === "+") setZoom((z) => zoomStep(z, 1));
       else if (k === "-") setZoom((z) => zoomStep(z, -1));
@@ -576,6 +628,7 @@ export default function App() {
       ) : !project ? (
         <Start
           recent={recent}
+          onNewProject={newProject}
           onOpenFolder={chooseFolder}
           onImportZip={importZip}
           onOpenRecent={(r) => api.openProject(r).then(openAndCompile).catch((e) => setError(String(e)))}
@@ -590,6 +643,11 @@ export default function App() {
               <Dropdown label={<span className="project-title">{project.name}</span>} className="project-menu">
                 {(close) => (
                   <>
+                    <MenuItem shortcut="⌘N" onClick={() => (close(), setCreatingFile(true))}>
+                      New file…
+                    </MenuItem>
+                    <MenuItem onClick={() => (close(), newProject())}>New project…</MenuItem>
+                    <div className="menu-sep" />
                     <MenuItem shortcut="⌘O" onClick={() => (close(), chooseFolder())}>
                       Open a folder…
                     </MenuItem>
@@ -621,6 +679,11 @@ export default function App() {
                 )}
               </Dropdown>
               )}
+              <button className="new-file" title="New file (⌘N)" aria-label="New file" onClick={() => setCreatingFile(true)}>
+                <svg viewBox="0 0 16 16" aria-hidden>
+                  <path d="M8 3v10M3 8h10" />
+                </svg>
+              </button>
             </div>
             <FileTree
               tree={project.tree}
@@ -630,6 +693,9 @@ export default function App() {
               onOpen={(p) => openFile(project, p)}
               onSetMain={setMain}
               onRename={renamePath}
+              creating={creatingFile}
+              onCreate={createFile}
+              onCancelCreate={() => setCreatingFile(false)}
             />
             {headings.length > 0 && (
               <div className={`outline${outlineOpen ? "" : " collapsed"}`}>
@@ -668,8 +734,9 @@ export default function App() {
                   <AiBar
                     selection={aiSel}
                     modelLabel={providerLabel(provider) + remoteNote(provider)}
-                    beforeApply={() => beforeAiEdit("edit selection")}
+                    beforeApply={() => beforeAiEdit(aiSel.text.trim() ? "edit selection" : "write at cursor")}
                     onPropose={proposeEdit}
+                    writeContext={writeContext}
                     onImage={pickImage}
                     onClose={() => setAiSel(null)}
                   />
@@ -750,6 +817,8 @@ export default function App() {
         </Group>
       )}
 
+      {helpOpen && <Help onClose={() => setHelpOpen(false)} />}
+
       {snapshotsOpen && project && (
         <Snapshots
           root={project.root}
@@ -775,6 +844,9 @@ export default function App() {
               ))}
               <div className="menu-sep" />
               <MenuItem onClick={() => (close(), setSetupOpen(true))}>TeX and AI status…</MenuItem>
+              <MenuItem shortcut="⌘?" onClick={() => (close(), setHelpOpen(true))}>
+                Help and shortcuts
+              </MenuItem>
             </>
           )}
         </Dropdown>

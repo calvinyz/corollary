@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-/** A name being renamed in place. Enter saves, Escape or clicking away cancels. */
-export function InlineName({ value, onSave, onCancel }: { value: string; onSave(name: string): void; onCancel(): void }) {
+/** A name being typed in place. Enter saves, Escape or clicking away cancels. */
+export function InlineName({ value, placeholder, onSave, onCancel }: { value: string; placeholder?: string; onSave(name: string): void; onCancel(): void }) {
   const [text, setText] = useState(value);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -16,6 +16,7 @@ export function InlineName({ value, onSave, onCancel }: { value: string; onSave(
       ref={input}
       className="inline-name"
       value={text}
+      placeholder={placeholder}
       onChange={(e) => setText(e.target.value)}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => {

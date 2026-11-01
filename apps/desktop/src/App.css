@@ -1293,7 +1293,39 @@ button.big {
 }
 
 .project-menu {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+}
+
+.new-file {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: 6px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.new-file:hover {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.new-file svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.tree-row.creating {
+  cursor: default;
 }
 
 .project-menu .dropdown-button {
@@ -1522,4 +1554,48 @@ button:focus-visible {
 
 .status-model.remote .where-dot {
   background: var(--warning);
+}
+
+.modal.help {
+  width: min(620px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+}
+
+.help-keys {
+  margin: 14px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.help-keys div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.help-keys dt,
+.help-keys dd {
+  margin: 0;
+}
+
+.help-keys dd {
+  color: var(--muted);
+}
+
+.modal h4 {
+  margin: 20px 0 6px;
+  font-size: 14px;
+}
+
+.help-tips {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.help-tips li {
+  margin: 4px 0;
 }

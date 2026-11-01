@@ -10,6 +10,10 @@ interface Props {
   onOpen(path: string): void;
   onSetMain(path: string): void;
   onRename(path: string, newName: string): void;
+  /** Shows a name field at the top of the tree for a new file. */
+  creating: boolean;
+  onCreate(path: string): void;
+  onCancelCreate(): void;
 }
 
 const KINDS: [RegExp, string][] = [
@@ -24,6 +28,12 @@ const kind = (name: string) => KINDS.find(([re]) => re.test(name))?.[1] ?? "file
 export function FileTree(props: Props) {
   return (
     <div className="file-tree" role="tree">
+      {props.creating && (
+        <div className="tree-row file creating" style={{ paddingLeft: 8 }}>
+          <span className="file-kind file" />
+          <InlineName value="" placeholder="name.tex" onSave={props.onCreate} onCancel={props.onCancelCreate} />
+        </div>
+      )}
       {props.tree.map((n) => (
         <Node key={n.path} node={n} depth={0} {...props} />
       ))}

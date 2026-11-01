@@ -221,6 +221,77 @@ pub fn rename_project(root: &Path, new_name: &str) -> io::Result<PathBuf> {
     Ok(to)
 }
 
+/// Creates an empty file, any type, or a folder when `relative` ends in `/`. Missing folders on
+/// the way are made too. Returns the new project-relative path.
+pub fn create(root: &Path, relative: &str) -> io::Result<String> {
+    let parts: Vec<&str> = relative.trim().split('/').filter(|p| !p.is_empty()).collect();
+    let Some(name) = parts.last() else { return Err(io::Error::new(io::ErrorKind::InvalidInput, "Type a name.")) };
+    parts.iter().try_for_each(|p| check_name(p))?;
+    let rel = parts.join("/");
+    let path = resolve(root, &rel)?;
+    // resolve() only checks what exists; a symlinked folder further up could still lead out.
+    let existing = path.ancestors().find(|a| a.exists()).ok_or(io::ErrorKind::NotFound)?;
+    if !existing.canonicalize()?.starts_with(root.canonicalize()?) {
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "path escapes the project"));
+    }
+    if path.exists() {
+        return Err(io::Error::new(io::ErrorKind::AlreadyExists, format!("“{name}” already exists.")));
+    }
+    if relative.trim_end().ends_with('/') {
+        fs::create_dir_all(&path)?;
+    } else {
+        fs::create_dir_all(path.parent().ok_or(io::ErrorKind::InvalidInput)?)?;
+        fs::OpenOptions::new().write(true).create_new(true).open(&path)?;
+    }
+    Ok(rel)
+}
+
+const STARTER_TEX: &str = r"\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{natbib}
+
+\title{TITLE}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Start writing here, and cite with \citet{knuth1984}.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}
+";
+
+const STARTER_BIB: &str = "@article{knuth1984,
+  title   = {Literate Programming},
+  author  = {Knuth, Donald E.},
+  journal = {The Computer Journal},
+  volume  = {27},
+  number  = {2},
+  pages   = {97--111},
+  year    = {1984}
+}
+";
+
+/// Makes a new project folder at `dir` with a main.tex and refs.bib that compile as they are.
+pub fn new_project(dir: &Path) -> io::Result<PathBuf> {
+    let name = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    check_name(&name)?;
+    if dir.exists() {
+        return Err(io::Error::new(io::ErrorKind::AlreadyExists, format!("A folder named “{name}” is already there.")));
+    }
+    fs::create_dir_all(dir)?;
+    // The folder name becomes the title unless it has characters TeX treats specially.
+    let plain = name.chars().all(|c| c.is_alphanumeric() || " -,.'".contains(c));
+    fs::write(dir.join("main.tex"), STARTER_TEX.replace("TITLE", if plain { &name } else { "Untitled" }))?;
+    fs::write(dir.join("refs.bib"), STARTER_BIB)?;
+    Ok(dir.to_path_buf())
+}
+
 /// Zips the project's source files (no build output, `.git` or hidden files) into `dest`.
 pub fn export_zip(root: &Path, dest: &Path) -> io::Result<()> {
     use std::io::Write;
@@ -255,6 +326,49 @@ mod tests {
         z.finish().unwrap();
         let out = import_zip(&zip_path, &base.join("out")).unwrap();
         assert!(out.join("main.tex").is_file(), "the outer folder should be dropped");
+        fs::remove_dir_all(&base).unwrap();
+    }
+
+    #[test]
+    fn creates_files_and_folders() {
+        let base = std::env::temp_dir().join(format!("corollary-create-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let root = base.join("paper");
+        fs::create_dir_all(&root).unwrap();
+        assert_eq!(create(&root, "refs.bib").unwrap(), "refs.bib");
+        assert_eq!(create(&root, " sections/intro.tex ").unwrap(), "sections/intro.tex");
+        assert!(root.join("sections/intro.tex").is_file());
+        assert_eq!(create(&root, "figures/").unwrap(), "figures");
+        assert!(root.join("figures").is_dir());
+        assert!(create(&root, "refs.bib").is_err(), "never overwrites");
+        for bad in ["", "/", "../x.tex", "a/../../x.tex", ".hidden", "a:b.tex"] {
+            assert!(create(&root, bad).is_err(), "{bad:?}");
+        }
+        #[cfg(unix)]
+        {
+            fs::create_dir_all(base.join("outside")).unwrap();
+            std::os::unix::fs::symlink(base.join("outside"), root.join("link")).unwrap();
+            assert!(create(&root, "link/deep/x.tex").is_err(), "through a symlink");
+            assert!(!base.join("outside/deep").exists());
+        }
+        fs::remove_dir_all(&base).unwrap();
+    }
+
+    #[test]
+    fn new_project_compiles_as_is() {
+        let base = std::env::temp_dir().join(format!("corollary-new-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        let dir = new_project(&base.join("My Paper")).unwrap();
+        let tex = fs::read_to_string(dir.join("main.tex")).unwrap();
+        assert!(tex.contains(r"\title{My Paper}"));
+        assert!(dir.join("refs.bib").is_file());
+        assert_eq!(open(&dir).unwrap().main.as_deref(), Some("main.tex"));
+        assert!(new_project(&dir).is_err(), "won't reuse a folder");
+        assert!(fs::read_to_string(new_project(&base.join("a_b")).unwrap().join("main.tex")).unwrap().contains(r"\title{Untitled}"));
+        if crate::latex::find_tex_bin().is_some() {
+            let r = crate::latex::compile(&dir, "main.tex", &base.join("build"), &crate::latex::Running::default());
+            assert_eq!(r.status, crate::latex::Status::Success, "{}", r.raw_log);
+        }
         fs::remove_dir_all(&base).unwrap();
     }
 

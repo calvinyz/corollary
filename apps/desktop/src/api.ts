@@ -110,6 +110,9 @@ export const api = {
   pickFile: (title: string, filter: string, extensions: string[]) => invoke<string | null>("pick_file", { title, filter, extensions }),
   pickSave: (title: string, fileName: string, filter: string, extensions: string[]) =>
     invoke<string | null>("pick_save", { title, fileName, filter, extensions }),
+  pickNewFolder: (title: string, name: string) => invoke<string | null>("pick_new_folder", { title, name }),
+  newProject: (path: string) => invoke<Project>("new_project", { path }),
+  createFile: (root: string, path: string) => invoke<string>("create_file", { root, path }),
   importZip: (zipPath: string, destParent: string) => invoke<Project>("import_zip", { zipPath, destParent }),
   readText: (root: string, path: string) => invoke<string>("read_text", { root, path }),
   writeText: (root: string, path: string, contents: string) => invoke<void>("write_text", { root, path, contents }),
