@@ -1,0 +1,4 @@
+/target/
+/gen/schemas
+# The corollary-fm sidecar, copied in by helpers/corollary-fm/install-into-app.sh
+/binaries/

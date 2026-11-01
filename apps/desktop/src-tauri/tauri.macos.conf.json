@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "externalBin": ["binaries/corollary-fm"],
+    "resources": {
+      "binaries/mlx-swift_Cmlx.bundle/": "mlx-swift_Cmlx.bundle/",
+      "THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt"
+    },
+    "macOS": {
+      "minimumSystemVersion": "14.0",
+      "signingIdentity": "-",
+      "hardenedRuntime": false,
+      "frameworks": ["binaries/libswiftCompatibilitySpan.dylib"]
+    }
+  }
+}
