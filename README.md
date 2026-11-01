@@ -11,7 +11,11 @@ your computer and the AI costs nothing.
 
 ## Install
 
-Download the DMG from [Releases](https://github.com/calvinyz/corollary/releases). Needs an Apple
+```bash
+brew install --cask calvinyz/tap/corollary
+```
+
+Or download the DMG from [Releases](https://github.com/calvinyz/corollary/releases). Needs an Apple
 silicon Mac with macOS 14 or later; the on-device AI needs macOS 26 with Apple Intelligence on.
 
 Corollary isn't notarized by Apple yet, so macOS blocks the first launch. Click Done, then open

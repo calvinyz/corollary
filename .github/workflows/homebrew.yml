@@ -1,0 +1,50 @@
+name: homebrew
+
+# Publishing a release (not drafting it: draft downloads aren't public) updates the cask in
+# calvinyz/homebrew-tap. Needs HOMEBREW_TAP_DEPLOY_KEY, a deploy key with write access to the tap.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, e.g. v0.1.0
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  cask:
+    runs-on: ubuntu-24.04
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: calvinyz/homebrew-tap
+          ssh-key: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+          path: tap
+
+      - name: Fill in the cask
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${TAG#v}
+          dmg="Corollary_${v}_aarch64.dmg"
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p "$dmg" -D "$RUNNER_TEMP"
+          sha=$(sha256sum "$RUNNER_TEMP/$dmg" | cut -d' ' -f1)
+          mkdir -p tap/Casks
+          sed -e "s/@VERSION@/$v/" -e "s/@SHA256@/$sha/" packaging/homebrew/corollary.rb > tap/Casks/corollary.rb
+          [[ $sha =~ ^[0-9a-f]{64}$ ]] && ! grep -q -E '@(VERSION|SHA256)@' tap/Casks/corollary.rb
+
+      - name: Push to the tap
+        working-directory: tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/corollary.rb
+          git diff --cached --quiet && { echo "cask unchanged"; exit 0; }
+          git commit -m "corollary ${TAG#v}"
+          git push

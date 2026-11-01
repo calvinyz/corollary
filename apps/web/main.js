@@ -146,6 +146,14 @@ for (const section of document.querySelectorAll("section")) {
   });
 }
 
+for (const b of document.querySelectorAll("[data-copy]")) {
+  b.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(b.dataset.copy).catch(() => {});
+    b.classList.add("done");
+    setTimeout(() => b.classList.remove("done"), 1600);
+  });
+}
+
 // Star count, when GitHub answers; the button works without it.
 fetch("https://api.github.com/repos/calvinyz/corollary")
   .then((r) => (r.ok ? r.json() : null))
