@@ -20,6 +20,7 @@ silicon Mac with macOS 14 or later; the on-device AI needs macOS 26 with Apple I
 
 Corollary isn't notarized by Apple yet, so macOS blocks the first launch. Click Done, then open
 System Settings › Privacy & Security and click **Open Anyway**. After that it updates itself.
+Or run `xattr -dr com.apple.quarantine /Applications/Corollary.app` in Terminal first.
 
 ## What it does
 

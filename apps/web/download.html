@@ -22,6 +22,7 @@
         <a class="button light" href="https://github.com/calvinyz/corollary/releases/latest/download/Corollary.dmg">Download for Mac (.dmg)</a>
         <button class="brew" title="Click to copy" aria-label="Copy the Homebrew install command" data-copy="brew install --cask calvinyz/tap/corollary"><code>brew install --cask calvinyz/tap/corollary</code><svg class="copy-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2" /><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" /></svg><span class="copied">Copied</span></button>
       </div>
+      <p class="dl-meta"><a href="https://github.com/calvinyz/corollary/releases/latest">Release notes</a> · Built from the public source by <a href="https://github.com/calvinyz/corollary/actions/workflows/release.yml">GitHub Actions</a></p>
 
       <h2>What you need</h2>
       <ul>
@@ -32,8 +33,17 @@
 
       <h2>The first time you open it</h2>
       <ol>
-        <li>Drag Corollary into your Applications folder and open it.</li>
-        <li>Corollary isn’t notarized by Apple yet, so macOS stops it the first time. Click Done, then open System Settings › Privacy &amp; Security, scroll down and click Open Anyway. You only do this once; updates install themselves.</li>
+        <li>Open the .dmg, drag Corollary into Applications, then open it.</li>
+        <li>
+          Corollary isn’t notarized by Apple yet, so macOS shows the warning it uses for any app that isn’t registered with Apple. It doesn’t mean anything was found. To open it (you only do this once; updates install themselves):
+          <div class="shots">
+            <figure><img src="assets/first-launch/not-opened.webp" width="336" height="304" alt="The “Corollary” Not Opened dialog, with a Done button" /><figcaption>Click Done</figcaption></figure>
+            <figure><img src="assets/first-launch/privacy-security.webp" width="204" height="143" alt="Privacy &amp; Security in the System Settings sidebar" /><figcaption>System Settings › Privacy &amp; Security</figcaption></figure>
+            <figure><img src="assets/first-launch/open-anyway.webp" width="480" height="190" alt="“Corollary” was blocked to protect your Mac, with an Open Anyway button" /><figcaption>Scroll down, click Open Anyway</figcaption></figure>
+          </div>
+          <p class="alt">Or paste this into Terminal, then open Corollary as usual:</p>
+          <button class="brew" title="Click to copy" aria-label="Copy the Terminal command" data-copy="xattr -dr com.apple.quarantine /Applications/Corollary.app"><code>xattr -dr com.apple.quarantine /Applications/Corollary.app</code><svg class="copy-icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2" /><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" /></svg><span class="copied">Copied</span></button>
+        </li>
         <li>Click Get started. If you don’t have TeX, Corollary installs it for you in about two minutes. You don’t need Homebrew or your password.</li>
         <li>Open a project folder, or drop in a zip from Overleaf or Prism. Then select some text and press ⌘K.</li>
       </ol>

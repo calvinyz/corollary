@@ -2111,6 +2111,57 @@ h3 {
   transform: none;
 }
 
+.shots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  margin: 16px 0 4px;
+}
+
+.shots figure {
+  margin: 0;
+  flex: 1 1 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shots figure:last-child {
+  flex-basis: 240px;
+}
+
+.shots img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.shots figcaption {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dl-meta {
+  margin: -4px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.doc .alt {
+  margin: 12px 0 8px;
+  color: var(--muted);
+}
+
+.doc li .brew {
+  max-width: 100%;
+}
+
+.doc li .brew code {
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
 @media (max-width: 600px) {
   .brew code {
     font-size: 11.5px;

@@ -7,6 +7,7 @@ choose a model that runs somewhere else.
 
 | When | Where it goes | What is sent |
 |---|---|---|
+| Corollary opens | github.com | A request for the latest release's `latest.json`. If there's a newer version, the update downloads from there. |
 | You install TeX Live from Setup | The TeX Live 2025 archive at ftp.math.utah.edu (or ftp.tu-chemnitz.de if that's down) | Requests for the installer and package archives |
 | A project needs a LaTeX package you don't have | The same server | Requests for the package index and the package archives to install. Finding which package has a missing file happens on your Mac. Never your document. |
 | You download the image-to-LaTeX model | huggingface.co | A request for the model files (1.2 GB, once) |
