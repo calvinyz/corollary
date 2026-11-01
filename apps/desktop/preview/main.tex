@@ -1,0 +1,63 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{natbib}
+\usepackage{hyperref}
+
+\title{Small Models, Careful Edits:\\ On-Device Language Models for Scientific Writing}
+\author{A. Researcher \and B. Collaborator}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Language models are now routinely used to revise scientific prose, yet most tools send unpublished
+manuscripts to remote servers. We study whether a small model running entirely on a laptop can make
+useful, verifiable edits to \LaTeX{} source. Across 80 edits, the on-device model preserved every
+citation, reference and label in 98\% of cases.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+Writing assistants based on large language models have become common in research
+workflows~\citep{smith2024assist}. Their usefulness, however, comes at a cost: the text of an
+unpublished paper leaves the author's machine. We ask a narrower question than prior work. Can a
+model small enough to run on a laptop make edits that an author would accept, without breaking
+the \LaTeX{} that surrounds the prose?
+
+\section{Method}
+\label{sec:method}
+Given a paragraph $p$ and an instruction $a$, the model proposes an edit $\hat{p}$. We accept
+$\hat{p}$ only if it keeps the set of keys $K(p)$ and every math segment of $p$ intact:
+\begin{equation}
+  \operatorname{accept}(p, \hat{p}) =
+  \mathbb{1}\left[\, K(\hat{p}) = K(p) \;\wedge\; M(p) \subseteq M(\hat{p}) \,\right].
+  \label{eq:accept}
+\end{equation}
+Edits that fail Eq.~\eqref{eq:accept} are retried once with the failure named in the prompt.
+
+\section{Results}
+\label{sec:results}
+Table~\ref{tab:results} summarises the four editing actions. Rewriting and shortening never
+dropped a key; the two failures changed units inside an inline formula.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lrr}
+    \hline
+    Action & Intact & Median time (s) \\
+    \hline
+    Rewrite & 20/20 & 3.2 \\
+    Shorten & 20/20 & 2.9 \\
+    Fix grammar & 19/20 & 3.6 \\
+    Formalize & 19/20 & 3.8 \\
+    \hline
+  \end{tabular}
+  \caption{Edits that kept all \LaTeX{} intact, per action.}
+  \label{tab:results}
+\end{table}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

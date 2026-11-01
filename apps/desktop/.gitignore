@@ -1,0 +1,8 @@
+node_modules
+dist
+*.local
+*.log
+
+.vscode/*
+!.vscode/extensions.json
+.idea
