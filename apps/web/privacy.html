@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy · Corollary</title>
+    <meta name="description" content="What Corollary sends over the network, and what stays on your Mac." />
+    <meta name="theme-color" content="#0b0b0a" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="page">
+    <header class="nav scrolled">
+      <a class="logo" href="index.html"><img src="assets/mark-dark.svg" alt="" width="22" height="22" />Corollary</a>
+      <span class="spacer"></span>
+      <a class="button light" href="download.html">Download</a>
+    </header>
+    <main class="doc">
+      <h1>Privacy</h1>
+      <p class="lede-doc">Corollary has no account, no analytics and no tracking. Your papers stay on your Mac unless you choose an AI model that runs somewhere else.</p>
+
+      <h2>When Corollary goes online</h2>
+      <table>
+        <tr><th>When</th><th>Where</th><th>What’s sent</th></tr>
+        <tr><td>You install TeX from Setup</td><td>The TeX Live archive (ftp.math.utah.edu, or ftp.tu-chemnitz.de as a backup)</td><td>Requests for the installer and package files</td></tr>
+        <tr><td>A paper needs a package you don’t have</td><td>The same server</td><td>Requests for that package. Finding which package you need happens on your Mac.</td></tr>
+        <tr><td>You turn on equations from photos</td><td>huggingface.co</td><td>One 1.2 GB download of the model</td></tr>
+        <tr><td>You choose an AI model on another computer or a cloud service</td><td>That server</td><td>The text you selected, or a compile error with the lines around it. The app shows “leaves this Mac” while one is selected.</td></tr>
+      </table>
+      <p>Nothing else uses the network. With Apple’s on-device model or Ollama on your Mac, AI edits work with Wi-Fi off.</p>
+
+      <h2>What stays on your Mac</h2>
+      <ul>
+        <li><b>Your projects</b>, in the folders you keep them in. Build files go to a cache folder, not into your project.</li>
+        <li><b>Snapshots</b> saved before each AI edit, so you can go back. They’re in <code>~/Library/Application Support/io.github.calvinyz.corollary/checkpoints</code>.</li>
+        <li><b>API keys</b> you enter, in your macOS Keychain.</li>
+        <li><b>A list of AI edits</b> (when, which model, whether you kept it), used to draft an acknowledgments note. It contains none of your text.</li>
+        <li><b>TeX</b>, in <code>~/Library/Corollary/texlive</code>, and the photo model, in <code>~/Library/Application Support/io.github.calvinyz.corollary/models</code>.</li>
+      </ul>
+
+      <h2>The models</h2>
+      <p>Apple’s on-device model is part of macOS. The photo-to-LaTeX model, GLM-OCR, runs on your Mac with MLX. If you connect a cloud service with your own key, that service’s privacy policy covers what you send it.</p>
+
+      <h2>This website</h2>
+      <p>No cookies and no analytics. The page asks GitHub for the repo’s star count, so GitHub sees that request.</p>
+
+      <p class="note">Corollary is open source, so you can <a href="https://github.com/calvinyz/corollary">read the code</a> and check all of this.</p>
+    </main>
+    <footer>
+      <a class="logo" href="index.html"><img src="assets/mark-dark.svg" alt="" width="18" height="18" />Corollary</a>
+      <span>Apache-2.0</span>
+      <a href="https://github.com/calvinyz/corollary">GitHub</a>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+  </body>
+</html>

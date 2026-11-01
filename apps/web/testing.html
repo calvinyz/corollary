@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How good is Apple’s on-device model at LaTeX? · Corollary</title>
+    <meta name="description" content="We tested Apple’s on-device model on 80 LaTeX edits. Here’s what it got right and what it broke." />
+    <meta name="theme-color" content="#0b0b0a" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="page">
+    <header class="nav scrolled">
+      <a class="logo" href="index.html"><img src="assets/mark-dark.svg" alt="" width="22" height="22" />Corollary</a>
+      <span class="spacer"></span>
+      <a class="button light" href="download.html">Download</a>
+    </header>
+    <main class="doc">
+      <p class="kicker">October 30, 2026</p>
+      <h1>How good is Apple’s on-device model at LaTeX?</h1>
+      <p class="lede-doc">Macs with Apple Intelligence come with a small language model that runs on the computer itself. Before building Corollary around it, we wanted to know whether it could edit a paper without breaking the LaTeX.</p>
+
+      <h2>The test</h2>
+      <p>We wrote 20 paragraphs in the style of arXiv papers, full of the things that usually go wrong: inline and display math, <code>\cite</code>, <code>\ref</code> and <code>\label</code>, footnotes, custom macros and lists. Then we asked the model to do four things to each one: rewrite it, shorten it, fix the grammar, and make it more formal. That’s 80 edits.</p>
+      <p>A script checked every result. An edit only counted if every citation, reference and label survived, every equation came back unchanged, and the braces and dollar signs still matched.</p>
+
+      <h2>What we found</h2>
+      <dl class="figures">
+        <div><dt>78 of 80</dt><dd>edits kept the LaTeX completely intact</dd></div>
+        <div><dt>3.4 s</dt><dd>for a typical paragraph, on an M1 Max</dd></div>
+        <div><dt>None</dt><dd>refused, out of 5 paragraphs on medicine, security and drugs</dd></div>
+      </dl>
+      <p>Both failures were on the same paragraph: the model tidied up the units inside <code>$E_a = 78 \pm 4\,\mathrm{kJ\,mol^{-1}}$</code>. No edit ever dropped or invented a citation, and none added chatter like “Here is your revised paragraph.”</p>
+
+      <h2>One thing that didn’t work</h2>
+      <p>Apple’s framework has a feature for getting structured answers back, and we tried it first. None of its 20 edits came back intact. The model writes its answer as JSON without escaping backslashes, so <code>\text</code> turns into a tab followed by “ext”, and <code>\footnote</code> into a form feed and “ootnote”. Corollary asks for plain text instead.</p>
+
+      <h2>What this means for Corollary</h2>
+      <ul>
+        <li><b>⌘K uses Apple’s model by default.</b> It’s good at paragraph-sized edits and costs nothing to run.</li>
+        <li><b>Every edit is still checked.</b> The same rules from this test run on every suggestion, so an edit that changes an equation or drops a citation is blocked before you see it.</li>
+        <li><b>It reads about 1,300 words at a time.</b> That’s plenty for a paragraph but not a whole paper. For bigger jobs, you can use a larger model through Ollama.</li>
+        <li><b>Explaining errors is harder.</b> On 6 test errors it found the right line 5 times but proposed a working fix only twice, so Corollary shows its fix for you to review rather than applying it.</li>
+      </ul>
+
+      <h2>Caveats</h2>
+      <p>This is one machine, one run, and paragraphs we wrote, not ones taken from real papers. Apple updates the model with macOS, so we’ll rerun the test with each release. The test code is <a href="https://github.com/calvinyz/corollary/tree/main/evals/probe-fm">on GitHub</a> if you want to run it yourself.</p>
+    </main>
+    <footer>
+      <a class="logo" href="index.html"><img src="assets/mark-dark.svg" alt="" width="18" height="18" />Corollary</a>
+      <span>Apache-2.0</span>
+      <a href="https://github.com/calvinyz/corollary">GitHub</a>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+  </body>
+</html>
