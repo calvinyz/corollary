@@ -1,6 +1,6 @@
 [package]
 name = "desktop"
-version = "0.1.0"
+version = "0.1.1"
 description = "A LaTeX workspace for Mac with on-device AI"
 authors = ["Calvin Zhou"]
 license = "Apache-2.0"
