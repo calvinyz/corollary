@@ -1,9 +1,13 @@
 name: build
 
+# Only app changes run this. Docs, the website and evals don't; run it by hand from the Actions tab.
 on:
   push:
     branches: [main]
+    paths: ["apps/desktop/**", ".github/workflows/build.yml"]
   pull_request:
+    paths: ["apps/desktop/**", ".github/workflows/build.yml"]
+  workflow_dispatch:
 
 permissions:
   contents: read
