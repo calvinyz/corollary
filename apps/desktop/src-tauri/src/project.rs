@@ -113,7 +113,8 @@ pub fn open(root: &Path) -> io::Result<Project> {
 /// Resolves a project-relative path, rejecting anything outside the project.
 pub fn resolve(root: &Path, relative: &str) -> io::Result<PathBuf> {
     let rel = Path::new(relative);
-    if rel.is_absolute() || rel.components().any(|c| matches!(c, Component::ParentDir | Component::Prefix(_))) {
+    // RootDir as well: on Windows `/etc/passwd` isn't absolute (no drive), but joins onto C:\.
+    if rel.is_absolute() || rel.components().any(|c| matches!(c, Component::ParentDir | Component::Prefix(_) | Component::RootDir)) {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "path escapes the project"));
     }
     let path = root.join(rel);
