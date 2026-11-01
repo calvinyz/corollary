@@ -1,0 +1,85 @@
+name: release
+
+# Push a tag like v0.1.0 to build an ad-hoc-signed DMG, the updater package and a draft GitHub
+# release. Publishing the draft is what ships it: the updater reads releases/latest.
+on:
+  push:
+    tags: ["v*"]
+
+# Creating the draft release is the only write.
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Check the tag matches the app version
+        run: |
+          v=$(jq -r .version apps/desktop/src-tauri/tauri.conf.json)
+          [ "v$v" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME, but tauri.conf.json says $v"; exit 1; }
+
+      # The helper uses macOS 26.4 FoundationModels APIs (contextSize, tokenCount).
+      - name: Select Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          v=$(xcodebuild -version | awk 'NR==1 {print $2}')
+          echo "Using $xcode ($v)"
+          [ "$(printf '%s\n' 26.4 "$v" | sort -V | head -1)" = 26.4 ] || { echo "Xcode $v is older than 26.4"; exit 1; }
+      - name: Metal Toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
+
+      - name: Build the on-device helper
+        working-directory: helpers/corollary-fm
+        run: ./build.sh && ./install-into-app.sh
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/desktop/pnpm-lock.yaml
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+
+      # Ad-hoc signed (tauri.macos.conf.json), so not notarized: users approve the first launch
+      # in System Settings. The updater package is signed with the key below instead.
+      - name: Build
+        working-directory: apps/desktop
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          pnpm install --frozen-lockfile
+          # Regenerated with the helper's Swift packages, which exist only after its build.
+          node scripts/third-party-licenses.mjs --require-swift
+          pnpm tauri build --bundles app,dmg --config '{"bundle":{"createUpdaterArtifacts":true}}'
+
+      - name: Check the bundle
+        working-directory: apps/desktop/src-tauri/target/release/bundle
+        run: |
+          codesign --verify --deep --strict --verbose=2 macos/Corollary.app
+          # Library validation kills the helper if signing and the hardened runtime disagree.
+          out=$(macos/Corollary.app/Contents/MacOS/corollary-fm --port 0 < /dev/null | head -1)
+          echo "$out" | grep -q '"port"' || { echo "corollary-fm didn't start: $out"; exit 1; }
+
+      - name: Draft release
+        working-directory: apps/desktop/src-tauri/target/release/bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${GITHUB_REF_NAME#v}
+          dmg=$(ls dmg/*.dmg)
+          jq -n --arg v "$v" --arg sig "$(cat macos/Corollary.app.tar.gz.sig)" \
+            --arg url "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/Corollary.app.tar.gz" \
+            --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{version: $v, pub_date: $date, platforms: {"darwin-aarch64": {signature: $sig, url: $url}}}' > latest.json
+          shasum -a 256 "$dmg"
+          gh release create "$GITHUB_REF_NAME" "$dmg" macos/Corollary.app.tar.gz macos/Corollary.app.tar.gz.sig latest.json \
+            -R "$GITHUB_REPOSITORY" --draft --title "Corollary $v" --generate-notes
