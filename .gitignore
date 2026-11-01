@@ -1,0 +1,8 @@
+.DS_Store
+*.profraw
+__pycache__/
+
+# Swift
+.build/
+.swiftpm/
+*.xcodeproj/xcuserdata/
