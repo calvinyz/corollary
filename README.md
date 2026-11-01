@@ -6,6 +6,8 @@ Corollary is a LaTeX workspace that feels like Overleaf: file tree, editor, PDF 
 Recompile button. Its AI runs on Apple's on-device model, so your unpublished paper never leaves
 your computer and the AI costs nothing.
 
+![Corollary: editor, PDF preview and an AI edit under review](apps/web/assets/workspace-review-dark.jpg)
+
 > **Moving from Prism?** OpenAI shuts Prism down on January 1, 2027 and deletes its data
 > afterwards. Export your projects before then and drop the zip into Corollary.
 
@@ -58,7 +60,8 @@ No account, no telemetry. With the default model, nothing you write leaves your 
 
 Planned after the first release: a chat panel, in-app MLX model downloads, citation verification
 (DOI/arXiv lookups, never BibTeX invented by a model), Zotero, dictation, venue templates, texlab
-completions, grammar checking, peer-to-peer collaboration, and Linux and Windows builds.
+completions, grammar checking and peer-to-peer collaboration. Corollary is Mac-only on purpose:
+the AI that needs no setup is Apple's on-device model.
 
 ## Repository
 

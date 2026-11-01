@@ -975,14 +975,14 @@ h3 {
   padding: 0;
 }
 
-.claims li {
+.claims > li {
   position: relative;
   padding: 18px 0 20px;
   border-top: 1px solid var(--rule);
   cursor: pointer;
 }
 
-.claims li:last-child {
+.claims > li:last-child {
   border-bottom: 1px solid var(--rule);
 }
 
@@ -994,15 +994,15 @@ h3 {
   transition: color 0.35s var(--ease);
 }
 
-.claims li:hover h3 {
+.claims > li:hover h3 {
   color: var(--muted);
 }
 
-.claims li.active h3 {
+.claims > li.active h3 {
   color: var(--text);
 }
 
-.claims p {
+.claims > li > p {
   color: #cfccc3;
   margin: 0;
   font-size: 16px;
@@ -1012,7 +1012,7 @@ h3 {
   transition: max-height 0.45s var(--ease), opacity 0.35s var(--ease), margin 0.45s var(--ease);
 }
 
-.claims li.active p {
+.claims > li.active > p {
   max-height: 4em;
   opacity: 1;
   margin-top: 8px;
@@ -1028,7 +1028,7 @@ h3 {
   background: var(--accent);
 }
 
-.claims li.active .tick {
+.claims > li.active .tick {
   width: calc(var(--step, 0) * 100%);
 }
 
@@ -1498,12 +1498,12 @@ h3 {
   .claims {
     padding: 0;
   }
-  .claims li {
+  .claims > li {
     padding: 28px 0;
     opacity: 1;
   }
   .drop {
-    height: 300px;
+    height: auto;
   }
 }
 
@@ -1671,7 +1671,7 @@ h3 {
     position: static;
     height: auto;
   }
-  .claims p {
+  .claims > li > p {
     max-height: none;
     opacity: 1;
     margin-top: 8px;
@@ -1688,10 +1688,10 @@ h3 {
 /* Phones */
 @media (max-width: 600px) {
   body {
-    font-size: 16px;
+    font-size: 15px;
   }
   h2 {
-    font-size: clamp(34px, 9.5vw, 44px);
+    font-size: clamp(28px, 8vw, 34px);
     margin-bottom: 20px;
   }
   .nav {
@@ -1702,15 +1702,15 @@ h3 {
     padding: 8px 14px;
   }
   .hero {
-    padding: 100px 20px 56px;
-    min-height: auto;
+    padding: 88px 20px 48px;
+    min-height: 100svh;
   }
   .compile-title {
-    font-size: clamp(40px, 12vw, 52px);
-    margin-bottom: 24px;
+    font-size: clamp(34px, 10vw, 42px);
+    margin-bottom: 20px;
   }
   .lede {
-    font-size: 17px;
+    font-size: 16px;
   }
   
   .stage {
@@ -1729,7 +1729,7 @@ h3 {
     padding: 0 20px;
   }
   .claims h3 {
-    font-size: 24px;
+    font-size: 20px;
   }
   .panel {
     height: 330px;
@@ -1738,13 +1738,14 @@ h3 {
     padding: 22px;
   }
 
+  /* The pinned demo is centred in the screen, which already leaves room above and below it. */
   .editing {
-    margin-top: 110px;
+    margin-top: 0;
     padding: 0 14px;
   }
   .editing-pin {
     gap: 14px;
-    padding-top: 60px;
+    padding-top: 56px;
   }
   .editing h2 {
     font-size: 28px;
@@ -1809,20 +1810,20 @@ h3 {
     --row: 22px;
   }
   .timeline p {
-    font-size: 19px;
+    font-size: 16.5px;
     line-height: 1.4;
   }
   .letter p {
-    font-size: 18px;
+    font-size: 16.5px;
   }
   summary {
-    font-size: 17px;
+    font-size: 15.5px;
   }
   .end {
     padding: 80px 20px 100px;
   }
   .end h2 {
-    font-size: 48px;
+    font-size: 38px;
   }
   footer {
     flex-wrap: wrap;
@@ -1838,13 +1839,13 @@ h3 {
   .different .panel {
     display: none;
   }
-  .claims li p,
-  .claims li.active p {
+  .claims > li > p,
+  .claims > li.active > p {
     max-height: none;
     opacity: 1;
     margin-top: 8px;
   }
-  .claims li h3 {
+  .claims > li h3 {
     color: var(--text);
   }
   .tick {
@@ -2028,7 +2029,7 @@ h3 {
     font-weight: 600;
   }
   .scroll-cue {
-    margin-top: -40px;
+    display: none;
   }
 }
 
@@ -2165,5 +2166,65 @@ h3 {
 @media (max-width: 600px) {
   .brew code {
     font-size: 11.5px;
+  }
+}
+
+/* Phones: the drop animation sits under the section's intro, before the list. */
+@media (max-width: 600px) {
+  .familiar {
+    gap: 0;
+  }
+  .familiar > .reveal {
+    display: contents;
+  }
+  .familiar {
+    margin-top: 0;
+  }
+  .familiar .drop {
+    order: 1;
+    padding-top: 64px;
+    margin-bottom: 28px;
+  }
+  .familiar .same {
+    order: 2;
+  }
+  .familiar .deadline {
+    margin-bottom: 0;
+  }
+  .doc h1 {
+    font-size: 34px;
+  }
+  .doc h2 {
+    font-size: 24px;
+  }
+  .lede-doc {
+    font-size: 16.5px;
+  }
+  .doc p,
+  .doc li {
+    font-size: 15px;
+  }
+}
+
+/* The per-point copies of the features panel: phones and tablets only. */
+.claims .panel {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .different .claims .panel {
+    display: block;
+    height: 240px;
+    margin-top: 16px;
+  }
+  .claims .scene {
+    padding: 22px;
+  }
+  .claims .edit-line {
+    font-size: 14px;
+  }
+  .claims .tex {
+    font-size: 13px;
+    white-space: pre-wrap;
   }
 }

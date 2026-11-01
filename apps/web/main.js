@@ -51,21 +51,40 @@ for (const p of letter.querySelectorAll("p")) {
 const words = [...letter.querySelectorAll(".w")];
 
 // Scene 0 of the features panel: the model's reply types out each time the scene opens.
-const reply = document.querySelector(".reply");
-let typing = 0;
-async function typeReply() {
-  const id = ++typing;
+async function typeReply(reply) {
+  const id = (reply.typing = (reply.typing || 0) + 1);
   const text = reply.dataset.text;
   reply.textContent = "";
   await new Promise((r) => setTimeout(r, 500));
-  for (let i = 1; i <= text.length && id === typing; i += 2) {
+  for (let i = 1; i <= text.length && id === reply.typing; i += 2) {
     reply.textContent = text.slice(0, i);
     await new Promise((r) => setTimeout(r, reduced ? 0 : 16));
   }
-  if (id === typing) reply.textContent = text;
+  if (id === reply.typing) reply.textContent = text;
 }
-const claims = [...document.querySelectorAll(".claims li")];
+const claims = [...document.querySelectorAll(".claims > li")];
 const panel = document.querySelector(".panel");
+// Phones don't pin the section: each point gets a copy of the panel with just its scene,
+// played when it scrolls into view and reset once it's gone.
+const minis = claims.map((c, i) => {
+  const m = panel.cloneNode(true);
+  delete m.dataset.active;
+  m.querySelectorAll(".scene").forEach((s, j) => j !== i && s.remove());
+  c.append(m);
+  return m;
+});
+const sceneSeen = new IntersectionObserver(
+  (entries) =>
+    entries.forEach(({ target: m, intersectionRatio: r }) => {
+      const i = minis.indexOf(m);
+      if (r >= 0.6 && m.dataset.active !== String(i)) {
+        m.dataset.active = i;
+        if (i === 0) typeReply(m.querySelector(".reply"));
+      } else if (r === 0) delete m.dataset.active;
+    }),
+  { threshold: [0, 0.6] },
+);
+minis.forEach((m) => sceneSeen.observe(m));
 const drop = document.querySelector(".drop");
 // Switching: play the drop each time it comes well into view, or on Replay.
 const playDrop = () => {
@@ -104,7 +123,7 @@ function onScroll() {
   if (panel.dataset.active !== String(best)) {
     panel.dataset.active = best;
     claims.forEach((c, i) => c.classList.toggle("active", i === best));
-    if (best === 0) typeReply();
+    if (best === 0) typeReply(panel.querySelector(".reply"));
   }
 
   // ⌘K demo: advance (or rewind) with the scroll, one step at a time.

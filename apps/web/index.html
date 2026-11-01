@@ -55,10 +55,13 @@
 
       <section class="stage">
         <div class="tilt">
-          <img
-            src="assets/workspace-review-dark.jpg"
-            alt="Corollary with a paper open: files on the left, the LaTeX source in the middle with an AI edit shown as a diff to accept or reject, and the compiled PDF on the right."
-          />
+          <picture>
+            <source media="(max-width: 600px)" srcset="assets/workspace-review-mobile.webp" />
+            <img
+              src="assets/workspace-review-dark.jpg"
+              alt="Corollary with a paper open: files on the left, the LaTeX source in the middle with an AI edit shown as a diff to accept or reject, and the compiled PDF on the right."
+            />
+          </picture>
         </div>
         <p class="requirements">Free and open source · Apple silicon Macs</p>
       </section>
@@ -188,7 +191,6 @@
         <ol class="timeline">
           <li class="reveal"><span class="when">Next</span><p>Download open models like Qwen and Gemma inside the app, for bigger jobs like reviewing a whole paper.</p></li>
           <li class="reveal"><span class="when">Then</span><p>Check that every reference in your .bib is real.</p></li>
-          <li class="reveal"><span class="when">Then</span><p>A version for Windows and Linux.</p></li>
           <li class="reveal"><span class="when">Later</span><p>Share a project and edit it with co-authors.</p></li>
         </ol>
         <p class="note reveal">
